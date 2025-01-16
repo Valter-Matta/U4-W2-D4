@@ -1,11 +1,12 @@
 package org.example;
 
-
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -68,10 +69,13 @@ public class Main {
 			System.out.println("Categoria: " + category + ", Totale: " + totals + "€"));
 
 		//es6
-
+		String filePath = "prodotti.txt";
 		try {
 			salvaProdottiSuDisco(listProducts1, "prodotti.txt");
-			System.out.println("Prodotti salvati sul disco");
+			System.out.println("\nProdotti salvati sul disco");
+			List<Product> prodottiLetti = leggiProdottiDaDisco(filePath);
+			System.out.println("\nProdotti letti da disco:");
+			prodottiLetti.forEach(System.out::println);
 		} catch (IOException e) {
 			System.err.println("Errore durante il salvataggio dei prodotti: " + e.getMessage());
 		}
@@ -80,12 +84,28 @@ public class Main {
 	public static void salvaProdottiSuDisco (List<Product> products, String filePath) throws IOException {
 
 		String data = products.stream()
-			.map(product -> product.name + "@" + product.category + "@" + product.price)
+			.map(p -> p.name + "@" + p.category + "@" + p.price)
 			.collect(Collectors.joining("#"));
 
 
 		FileUtils.writeStringToFile(new File(filePath), data, "UTF-8");
 	}
 
+	public static List<Product> leggiProdottiDaDisco (String filePath) throws IOException {
+		String data = FileUtils.readFileToString(new File(filePath), "UTF-8");
+
+
+		String[] prodottiArray = data.split("#");
+		List<Product> products = new ArrayList<>();
+
+		for (String prodotto : prodottiArray) {
+			String[] campi = prodotto.split("@");
+			String name = campi[0];
+			String category = campi[1];
+			double price = Double.parseDouble(campi[2]);
+			products.add(new Product(null, name, category, price));
+		}
+		return products;
+	}
 
 }
